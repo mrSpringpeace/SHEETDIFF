@@ -275,6 +275,15 @@ try:
 finally:
     set_lang("cs")
 
+# ---------------------------------------------------------------- verze
+
+from sheetdiff import __version__  # noqa: E402
+
+changelog = open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read()
+ok = re.fullmatch(r"\d+\.\d+\.\d+", __version__) is not None and f"\n## {__version__} (" in changelog
+failures += not ok
+print(f"[{'OK ' if ok else 'CHYBA'}] verze {__version__} má záznam v CHANGELOG.md")
+
 print(f"\nVarianty v {TMP}")
 print("VŠE OK" if not failures else f"SELHALO: {failures}")
 sys.exit(1 if failures else 0)

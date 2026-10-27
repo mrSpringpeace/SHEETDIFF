@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 
+from . import __version__
 from .compare import LAYERS, compare
 from .i18n import _, set_lang
 from .report import render
@@ -67,6 +68,7 @@ def main(argv=None) -> int:
     p.add_argument(*names("--bez", "--skip"), dest="bez", action="append", default=[], choices=LAYERS,
                    metavar=_("VRSTVA"),
                    help=_("vypnout vrstvu: {x} (lze opakovat)", x=", ".join(LAYERS)))
+    p.add_argument("-V", "--version", action="version", version=f"SHEETDIFF {__version__}")
     p.add_argument("--excel", action="store_true",
                    help=_("vytvořit i Excel report (stejný název, přípona .xlsx)"))
     p.add_argument(*names("--jazyk", "--lang"), dest="lang", choices=("cs", "en"), default="cs",

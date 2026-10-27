@@ -8,6 +8,7 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from . import __version__
 from .compare import Result, cat_name
 from .i18n import _
 
@@ -59,6 +60,7 @@ def write(res: Result, path: str):
         (_("Nový soubor (B)"), res.b.path),
         (_("Verdikt"), res.headline),
         (_("Návratový kód"), str(res.exit_code)),
+        ("SHEETDIFF", __version__),
     ]
     lines += [("", f) for f in res.facts]
     lines.append(("", ""))

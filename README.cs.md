@@ -40,7 +40,7 @@ přejmenovaný list.
 
 ## Stažení
 
-Windows: `SHEETDIFF.exe` v [Releases](https://github.com/mrSpringpeace/SHEETDIFF/releases/latest).
+Windows: `SHEETDIFF_vX.Y.Z.exe` v [Releases](https://github.com/mrSpringpeace/SHEETDIFF/releases/latest).
 Jeden soubor, bez instalace a bez Pythonu.
 
 Exe není digitálně podepsané, Windows SmartScreen proto může při prvním spuštění varovat
@@ -108,8 +108,13 @@ každého druhu. Vytváří je `tools/demo.py`.
 
 ## Sestavení exe
 
-`build_exe.bat` sestaví `dist\SHEETDIFF.exe` pomocí [Nuitka](https://nuitka.net) (onefile,
+`build_exe.bat` sestaví `dist\SHEETDIFF_vX.Y.Z.exe` pomocí [Nuitka](https://nuitka.net) (onefile,
 kompilátor Zig se stáhne sám). `tools/make_screenshot.py` vyrobí screenshoty z ukázkových souborů.
+
+## Verze
+
+Sémantické verzování, verze je v `sheetdiff/__init__.py`, vydání mají tag `vX.Y.Z`.
+Přehled změn je v [CHANGELOG.md](CHANGELOG.md), `SHEETDIFF --version` verzi vypíše.
 
 ## Testy
 

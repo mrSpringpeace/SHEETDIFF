@@ -1,6 +1,6 @@
 @echo off
 rem SHEETDIFF - sestaveni jednoho SHEETDIFF.exe pomoci Nuitka (kompilator Zig se stahne sam).
-rem Vysledek: dist\SHEETDIFF.exe
+rem Vysledek: dist\SHEETDIFF_v<verze>.exe (verze ze sheetdiff\__init__.py)
 setlocal
 cd /d "%~dp0"
 
@@ -26,11 +26,11 @@ python -m nuitka sheetdiff_main.py ^
     --file-version=%VER%.0 ^
     --product-version=%VER%.0 ^
     --output-dir=build ^
-    --output-filename=SHEETDIFF.exe ^
+    --output-filename=SHEETDIFF_v%VER%.exe ^
     --remove-output
 if errorlevel 1 exit /b 1
 
 if not exist dist mkdir dist
-move /y build\SHEETDIFF.exe dist\SHEETDIFF.exe >nul
+move /y build\SHEETDIFF_v%VER%.exe dist\SHEETDIFF_v%VER%.exe >nul
 echo.
-echo Hotovo: %CD%\dist\SHEETDIFF.exe
+echo Hotovo: %CD%\dist\SHEETDIFF_v%VER%.exe

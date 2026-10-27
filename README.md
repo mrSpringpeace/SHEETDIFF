@@ -42,7 +42,7 @@ References to a renamed sheet are handled the same way.
 
 ## Download
 
-Windows: download `SHEETDIFF.exe` from [Releases](https://github.com/mrSpringpeace/SHEETDIFF/releases/latest).
+Windows: download `SHEETDIFF_vX.Y.Z.exe` from [Releases](https://github.com/mrSpringpeace/SHEETDIFF/releases/latest).
 It is a single file, no installation and no Python needed.
 
 The exe is not code-signed, so Windows SmartScreen may warn on the first start
@@ -113,9 +113,14 @@ data validation, chart title, picture, text box, renamed sheet). `tools/demo.py`
 
 ## Building the exe
 
-`build_exe.bat` builds `dist\SHEETDIFF.exe` with [Nuitka](https://nuitka.net) (onefile, the Zig
+`build_exe.bat` builds `dist\SHEETDIFF_vX.Y.Z.exe` with [Nuitka](https://nuitka.net) (onefile, the Zig
 C compiler is downloaded automatically). `tools/make_screenshot.py` renders the screenshots above
 from the example files.
+
+## Versions
+
+Semantic versioning, the version is set in `sheetdiff/__init__.py`, releases are tagged
+`vX.Y.Z`. See [CHANGELOG.md](CHANGELOG.md). `SHEETDIFF --version` prints it.
 
 ## Tests
 

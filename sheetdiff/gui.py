@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from . import win_drop
+from . import __version__
 from .cli import run
 from .i18n import _, get_lang, set_lang, system_lang
 
@@ -77,7 +78,7 @@ class App(ttk.Frame):
     def build(self):
         for w in self.winfo_children():
             w.destroy()
-        self.root.title(_("SHEETDIFF – porovnání dvou sešitů"))
+        self.root.title(_("SHEETDIFF – porovnání dvou sešitů") + f"  ({__version__})")
 
         top = ttk.Frame(self)
         top.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 8))
