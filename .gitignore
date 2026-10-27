@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+build/
+dist/
+*.exe
+*.build/
+*.onefile-build/
+*.dist/
+
+# testy nad internimi soubory - nikdy necommitovat
+tests/private/
+
+# reporty
+*__vs__*.html
+*__vs__*.xlsx
