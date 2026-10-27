@@ -2,6 +2,10 @@
 
 Okno se zaregistruje přes DragAcceptFiles a jeho procedura se obalí, aby zachytila
 WM_DROPFILES. Ostatní zprávy jdou beze změny původní proceduře Tk.
+
+Procedura okna běží uprostřed zpracování zprávy v Tk, kdy Tk drží svůj zámek.
+Volat z ní tkinter (after, widgety …) shodí Python fatální chybou GIL, proto si jen
+odloží cesty a Tk je vyzvedne vlastním časovačem.
 """
 from __future__ import annotations
 
@@ -11,6 +15,7 @@ from ctypes import wintypes
 
 WM_DROPFILES = 0x0233
 GWLP_WNDPROC = -4
+POLL_MS = 100
 LRESULT = ctypes.c_ssize_t
 WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
 
@@ -42,6 +47,19 @@ def enable(widget, on_drop) -> bool:
         user32, shell32 = _api()
         hwnd = widget.winfo_id()
         state = {"old": None}
+        pending: list = []   # (soubory, bod) z procedury okna, vyzvedává poll()
+
+        def poll():
+            while pending:
+                files, xy = pending.pop(0)
+                try:
+                    on_drop(files, xy)
+                except Exception:
+                    pass
+            try:
+                widget.after(POLL_MS, poll)
+            except Exception:   # okno je zavřené
+                pass
 
         def proc(h, msg, wparam, lparam):
             if msg == WM_DROPFILES:
@@ -58,7 +76,7 @@ def enable(widget, on_drop) -> bool:
                     user32.ClientToScreen(h, ctypes.byref(pt))
                 finally:
                     shell32.DragFinish(wparam)
-                widget.after(0, on_drop, files, (pt.x, pt.y))
+                pending.append((files, (pt.x, pt.y)))   # žádné volání Tk odsud!
                 return 0
             if state["old"] is None:
                 return user32.DefWindowProcW(h, msg, wparam, lparam)
@@ -71,19 +89,23 @@ def enable(widget, on_drop) -> bool:
             return False
         widget._drop_proc = new_proc   # bez reference by procedura zanikla
         shell32.DragAcceptFiles(hwnd, True)
+        widget.after(POLL_MS, poll)
         return True
     except Exception:
         return False
 
 
 def simulate_drop(widget, files: list[str], client_xy=(0, 0)):
-    """Pošle oknu WM_DROPFILES jako Průzkumník (pro testy)."""
+    """Pošle oknu WM_DROPFILES jako Průzkumník (pro testy).
+
+    Zpráva jde frontou (PostMessage), takže ji doručí smyčka Tk stejně jako při skutečném
+    přetažení. SendMessage z kódu Pythonu by chybu s voláním Tk z procedury okna neukázal.
+    """
     kernel32 = ctypes.WinDLL("kernel32")
     user32 = ctypes.WinDLL("user32")
     kernel32.GlobalAlloc.restype = ctypes.c_void_p
     kernel32.GlobalAlloc.argtypes = [wintypes.UINT, ctypes.c_size_t]
-    user32.SendMessageW.restype = LRESULT
-    user32.SendMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+    user32.PostMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
 
     class DROPFILES(ctypes.Structure):
         _fields_ = [("pFiles", wintypes.DWORD), ("pt", wintypes.POINT),
@@ -95,4 +117,4 @@ def simulate_drop(widget, files: list[str], client_xy=(0, 0)):
     mem = kernel32.GlobalAlloc(0x0040, size)   # GMEM_FIXED | GMEM_ZEROINIT
     ctypes.memmove(mem, ctypes.byref(head), ctypes.sizeof(DROPFILES))
     ctypes.memmove(mem + ctypes.sizeof(DROPFILES), names, len(names))
-    user32.SendMessageW(widget.winfo_id(), WM_DROPFILES, mem, 0)
+    user32.PostMessageW(widget.winfo_id(), WM_DROPFILES, mem, 0)

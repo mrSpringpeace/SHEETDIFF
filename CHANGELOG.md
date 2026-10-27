@@ -5,6 +5,16 @@ The version lives in one place, `sheetdiff/__init__.py`. The build script, the w
 the reports and `--version` all read it from there. Each release gets a git tag `vX.Y.Z` and a
 section in this file.
 
+## 0.4.1 (2026-10-27)
+
+* Fixed: the exe (and the window started from Python) crashed when files were dragged into the
+  window. The window procedure called Tk while Tk was handling the message; it now only stores
+  the dropped paths and the window picks them up with its own timer.
+* The comparison thread no longer calls Tk directly either; it hands the result over through a
+  queue.
+* New test `tests/gui_drop.py`: drops files through the Windows message queue, the same way
+  Explorer does, in a separate process.
+
 ## 0.4.0 (2026-10-27)
 
 First public version.

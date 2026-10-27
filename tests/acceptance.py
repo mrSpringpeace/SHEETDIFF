@@ -275,6 +275,22 @@ try:
 finally:
     set_lang("cs")
 
+# ---------------------------------------------------------------- okno a přetažení
+
+if sys.platform == "win32":
+    import subprocess  # noqa: E402
+    try:
+        p = subprocess.run([sys.executable, os.path.join(ROOT, "tests", "gui_drop.py")],
+                           capture_output=True, text=True, encoding="utf-8", timeout=90)
+        out = (p.stdout + p.stderr).strip()
+    except subprocess.TimeoutExpired:
+        out = "časový limit vypršel (okno zamrzlo)"
+    ok = out.endswith("GUI OK")
+    failures += not ok
+    print(f"[{'OK ' if ok else 'CHYBA'}] okno: přetažení souborů frontou zpráv")
+    if not ok:
+        print("         ", out[-1500:])
+
 # ---------------------------------------------------------------- verze
 
 from sheetdiff import __version__  # noqa: E402

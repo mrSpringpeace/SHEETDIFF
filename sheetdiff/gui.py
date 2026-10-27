@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import sys
 import threading
 import traceback
@@ -215,14 +216,27 @@ class App(ttk.Frame):
         self.progress.grid(row=0, column=1, padx=12)
         self.progress.start(12)
         self.set_status(_("Porovnávám…"))
-        threading.Thread(target=self.work, args=(a, b, out, self.excel.get()), daemon=True).start()
+        results: queue.SimpleQueue = queue.SimpleQueue()
+        threading.Thread(target=self.work, args=(a, b, out, self.excel.get(), results),
+                         daemon=True).start()
+        self.root.after(100, self.wait_result, results)
 
-    def work(self, a, b, out, excel):
+    @staticmethod
+    def work(a, b, out, excel, results):
+        """Běží ve vedlejším vlákně: Tk se odsud nevolá, výsledek jde frontou."""
         try:
             res, path, xlsx = run(a, b, out, excel=excel)
-            self.root.after(0, self.done, res, path, xlsx, None)
+            results.put((res, path, xlsx, None))
         except Exception as e:
-            self.root.after(0, self.done, None, None, None, (e, traceback.format_exc()))
+            results.put((None, None, None, (e, traceback.format_exc())))
+
+    def wait_result(self, results):
+        try:
+            item = results.get_nowait()
+        except queue.Empty:
+            self.root.after(100, self.wait_result, results)
+            return
+        self.done(*item)
 
     def done(self, res, path, xlsx, err):
         self.progress.stop()
